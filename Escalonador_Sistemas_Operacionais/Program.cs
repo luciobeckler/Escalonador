@@ -35,13 +35,10 @@ if (Directory.Exists(pasta))
             processos.Add(new Processo(chegada, duracao));
         }
 
-        List<string> result = new List<string>();
-        result.Add(escalonador.FIFO());
-        result.Add(escalonador.SJF());
-        result.Add(escalonador.SRT());
-        result.Add(escalonador.RR(numQuantum));
-
-
+        List<Processo> resultFIFO = escalonador.executaFIFO(processos);
+        List<Processo> resultSJF = escalonador.executaSJF(processos);
+        List<Processo> resultSRT = escalonador.executaSRT(processos);
+        List<Processo> resultRR = escalonador.executaRR(processos,  numQuantum);
 
         string nomeArquivoSemExtensao = Path.GetFileNameWithoutExtension(file);
         string numero = nomeArquivoSemExtensao.Split("-")[1];
@@ -52,7 +49,7 @@ if (Directory.Exists(pasta))
 
         try
         {
-            string conteudoCompleto = string.Join(Environment.NewLine, result);
+            string conteudoCompleto = string.Join(Environment.NewLine, new List<string>());
             File.WriteAllText(caminhoArquivoResultado, conteudoCompleto);
             
         }

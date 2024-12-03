@@ -10,6 +10,14 @@ namespace Escalonador_Sistemas_Operacionais
     {
         public int chegada { get; set; }
         public int duracao { get; set; }
+        public float tempoEspera { get; set; } = 0;  //Tempo que o processo aguarda para ser executado
+        public float tempoRetorno { get; set; } = 0; //Tempo que o processo espera para voltar a ser executado
+        public float tempoTurnAround {                
+            get 
+            { 
+                return tempoEspera + duracao;
+            } 
+        }
 
         public Processo(int chegada, int duracao)
         {

@@ -1,0 +1,4 @@
+System.Collections.Generic.List`1[Escalonador_Sistemas_Operacionais.Processo]
+System.Collections.Generic.List`1[Escalonador_Sistemas_Operacionais.Processo]
+System.Collections.Generic.List`1[Escalonador_Sistemas_Operacionais.Processo]
+System.Collections.Generic.List`1[Escalonador_Sistemas_Operacionais.Processo]
