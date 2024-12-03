@@ -19,7 +19,7 @@ namespace Escalonador_Sistemas_Operacionais
             foreach (var item in processos)
                 queue.Enqueue(item);
 
-            int tempoAtual = 0;
+            int tempoAtual = 1;
             while (queue.Count > 0)
             {
                 Processo processoEmExecucao = queue.Dequeue();
@@ -34,7 +34,32 @@ namespace Escalonador_Sistemas_Operacionais
         }
         public List<Processo> executaSJF(List<Processo> processos)
         {
-            return new List<Processo>();
+            List<Processo> retorno = new List<Processo>();
+            int tempoAtual = 1;
+
+            while(processos.Count > 0)
+            {
+                Processo processoEmExecucao = processos[0];
+                processoEmExecucao.tempoRetorno = 0;
+                processoEmExecucao.tempoEspera = tempoAtual - processoEmExecucao.chegada;
+                tempoAtual += processoEmExecucao.duracao;
+
+                retorno.Add(processoEmExecucao);
+                processos.Remove(processoEmExecucao);
+
+                var processoComMenorDuracaoENoTempoAtual = processos
+                    .OrderBy(x => x.duracao)
+                    .Where(x => tempoAtual >= x.chegada)
+                    .FirstOrDefault();
+
+                if(processoComMenorDuracaoENoTempoAtual != null)
+                {
+                    processos.Remove(processoComMenorDuracaoENoTempoAtual);
+                    processos.Insert(0, processoComMenorDuracaoENoTempoAtual);
+                }
+
+            }
+            return retorno;
         }
         public List<Processo> executaSRT(List<Processo> processos)
         {

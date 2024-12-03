@@ -1,4 +1,4 @@
-System.Collections.Generic.List`1[Escalonador_Sistemas_Operacionais.Processo]
-System.Collections.Generic.List`1[Escalonador_Sistemas_Operacionais.Processo]
-System.Collections.Generic.List`1[Escalonador_Sistemas_Operacionais.Processo]
-System.Collections.Generic.List`1[Escalonador_Sistemas_Operacionais.Processo]
+0	2,5	4,285714
+0	2,5	4,285714
+NaN	NaN	NaN
+NaN	NaN	NaN

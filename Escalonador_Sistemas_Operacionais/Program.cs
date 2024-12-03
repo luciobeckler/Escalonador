@@ -2,6 +2,7 @@
 
 
 using Escalonador_Sistemas_Operacionais;
+using System.Text;
 
 string pasta = "C:\\Users\\lucio\\Documents\\ParkIF\\Escalonador_Sistemas_Operacionais\\Escalonador_Sistemas_Operacionais\\ArquivosTestes\\";
 
@@ -35,10 +36,39 @@ if (Directory.Exists(pasta))
             processos.Add(new Processo(chegada, duracao));
         }
 
-        List<Processo> resultFIFO = escalonador.executaFIFO(processos);
-        List<Processo> resultSJF = escalonador.executaSJF(processos);
-        List<Processo> resultSRT = escalonador.executaSRT(processos);
-        List<Processo> resultRR = escalonador.executaRR(processos,  numQuantum);
+        List<List<Processo>> result = new List<List<Processo>>();
+
+        result.Add(escalonador.executaFIFO(processos));
+        result.Add(escalonador.executaSJF(processos));
+        result.Add(escalonador.executaSRT(processos));
+        result.Add(escalonador.executaRR(processos,  numQuantum));
+
+        float[,] medias = new float[4,3];
+        int i = 0;
+
+        foreach (var tipoDeEscalonador in result)
+        {
+            float somaTempoRetorno = 0;
+            float somaTempoEspera = 0;
+            float somaTempoTurnaround = 0;
+
+            int totalProcessos = tipoDeEscalonador.Count;
+
+            foreach (var processo in tipoDeEscalonador)
+            {
+                somaTempoRetorno += processo.tempoRetorno;
+                somaTempoEspera += processo.tempoEspera;
+                somaTempoTurnaround += processo.tempoTurnAround;
+
+                totalProcessos++;
+            }
+
+            medias[i, 0] = somaTempoRetorno / totalProcessos;
+            medias[i, 1] = somaTempoEspera / totalProcessos;
+            medias[i, 2] = somaTempoTurnaround / totalProcessos;
+
+            i++;
+        }
 
         string nomeArquivoSemExtensao = Path.GetFileNameWithoutExtension(file);
         string numero = nomeArquivoSemExtensao.Split("-")[1];
@@ -49,7 +79,18 @@ if (Directory.Exists(pasta))
 
         try
         {
-            string conteudoCompleto = string.Join(Environment.NewLine, new List<string>());
+            StringBuilder sb = new StringBuilder();
+
+            for (int j = 0; j < medias.GetLength(0); j++)
+            { 
+                string tempoRetornoMedio = medias[j, 0].ToString();
+                string tempoEsperaMedio = medias[j, 1].ToString();
+                string tempoTurnaroundMedio = medias[j, 2].ToString();
+
+                sb.AppendLine($"{tempoRetornoMedio}\t{tempoEsperaMedio}\t{tempoTurnaroundMedio}");
+            }
+
+            string conteudoCompleto = string.Join(Environment.NewLine, sb);
             File.WriteAllText(caminhoArquivoResultado, conteudoCompleto);
             
         }
