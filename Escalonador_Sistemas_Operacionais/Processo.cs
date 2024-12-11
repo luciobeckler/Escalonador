@@ -10,19 +10,22 @@ namespace Escalonador_Sistemas_Operacionais
     {
         public int chegada { get; set; }
         public int duracao { get; set; }
+        private int duracaoOriginal { get; set; } //Criado pois "duracao" é alterado durante o fluxo de execução e este é usado para o turnAround
         public float tempoEspera { get; set; } = 0;  //Tempo que o processo aguarda para ser executado
         public float tempoRetorno { get; set; } = 0; //Tempo que o processo espera para voltar a ser executado
         public float tempoTurnAround {                
             get 
             { 
-                return tempoEspera + duracao;
+                return tempoEspera + duracaoOriginal;
             }
         }
+        public bool isEsteveEmExecucao { get; set; }
 
         public Processo(int chegada, int duracao)
         {
             this.chegada = chegada;
             this.duracao = duracao;
+            this.duracaoOriginal = duracao;
         }
 
         public Processo Clone()

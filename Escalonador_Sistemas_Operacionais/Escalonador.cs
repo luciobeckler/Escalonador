@@ -68,8 +68,35 @@ namespace Escalonador_Sistemas_Operacionais
 
             int tempoAtual = 1;
             while (processos.Count > 0)
-            {              
+            {
+                List<Processo> processosQueJaChegaramOrdenadosPorDuracao = processos
+                        .Where(p => tempoAtual >= p.chegada )
+                        .OrderBy(p => p.duracao)
+                        .ToList();
 
+                Processo processoEmExecucao = processosQueJaChegaramOrdenadosPorDuracao.FirstOrDefault();
+                processoEmExecucao.duracao--;
+                processoEmExecucao.isEsteveEmExecucao = true;
+
+                if (processoEmExecucao.duracao == 0)
+                    retorno.Add(processoEmExecucao);
+                
+                processosQueJaChegaramOrdenadosPorDuracao.RemoveAt(0);
+
+                foreach (var item in processosQueJaChegaramOrdenadosPorDuracao)
+                {
+                    if(!item.isEsteveEmExecucao)
+                        item.tempoEspera++;
+
+                    if (item.isEsteveEmExecucao)
+                        item.tempoRetorno++;
+                }
+
+                
+
+                processos.RemoveAll(p => p.duracao == 0);
+
+                tempoAtual++;
             }
 
             return retorno;
