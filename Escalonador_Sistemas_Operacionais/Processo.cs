@@ -16,13 +16,22 @@ namespace Escalonador_Sistemas_Operacionais
             get 
             { 
                 return tempoEspera + duracao;
-            } 
+            }
         }
 
         public Processo(int chegada, int duracao)
         {
             this.chegada = chegada;
             this.duracao = duracao;
+        }
+
+        public Processo Clone()
+        {
+            return new Processo(this.chegada, this.duracao)
+            {
+                tempoRetorno = this.tempoRetorno,
+                tempoEspera = this.tempoEspera,
+            };
         }
     }
 }

@@ -63,7 +63,16 @@ namespace Escalonador_Sistemas_Operacionais
         }
         public List<Processo> executaSRT(List<Processo> processos)
         {
-            return new List<Processo>();
+            List<Processo> retorno = new List<Processo>();
+            List<Processo> listaExecução = new List<Processo>();
+
+            int tempoAtual = 1;
+            while (processos.Count > 0)
+            {              
+
+            }
+
+            return retorno;
         }
         public List<Processo> executaRR(List<Processo> processos, int numQuantum)
         {

@@ -1,4 +1,0 @@
-0	2,5	4,285714
-0	2,5	4,285714
-NaN	NaN	NaN
-NaN	NaN	NaN

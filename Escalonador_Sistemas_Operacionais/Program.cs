@@ -1,7 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-
-using Escalonador_Sistemas_Operacionais;
+﻿using Escalonador_Sistemas_Operacionais;
 using System.Text;
 
 string pasta = "C:\\Users\\lucio\\Documents\\ParkIF\\Escalonador_Sistemas_Operacionais\\Escalonador_Sistemas_Operacionais\\ArquivosTestes\\";
@@ -12,95 +9,92 @@ if (Directory.Exists(pasta))
 
     foreach (string file in files)
     {
-        
-        List<Processo> processos = new List<Processo>();
-        Escalonador escalonador = new Escalonador();
-
-        string content = File.ReadAllText(file);
-
-        List<string> processosString = content.Split("\n").ToList();
-        int numQuantum = int.Parse(processosString[0]);
-        processosString.RemoveRange(0, 1);
-
-
-
-        Console.WriteLine(content);
-
-        foreach (var item in processosString)
-        {
-            string[] partes = item.Split(" ");
-
-            int chegada = int.Parse(partes[0]);
-            int duracao = int.Parse(partes[1].Substring(0));
-
-            processos.Add(new Processo(chegada, duracao));
-        }
-
-        List<List<Processo>> result = new List<List<Processo>>();
-
-        result.Add(escalonador.executaFIFO(processos));
-        result.Add(escalonador.executaSJF(processos));
-        result.Add(escalonador.executaSRT(processos));
-        result.Add(escalonador.executaRR(processos,  numQuantum));
-
-        float[,] medias = new float[4,3];
-        int i = 0;
-
-        foreach (var tipoDeEscalonador in result)
-        {
-            float somaTempoRetorno = 0;
-            float somaTempoEspera = 0;
-            float somaTempoTurnaround = 0;
-
-            int totalProcessos = tipoDeEscalonador.Count;
-
-            foreach (var processo in tipoDeEscalonador)
-            {
-                somaTempoRetorno += processo.tempoRetorno;
-                somaTempoEspera += processo.tempoEspera;
-                somaTempoTurnaround += processo.tempoTurnAround;
-
-                totalProcessos++;
-            }
-
-            medias[i, 0] = somaTempoRetorno / totalProcessos;
-            medias[i, 1] = somaTempoEspera / totalProcessos;
-            medias[i, 2] = somaTempoTurnaround / totalProcessos;
-
-            i++;
-        }
-
-        string nomeArquivoSemExtensao = Path.GetFileNameWithoutExtension(file);
-        string numero = nomeArquivoSemExtensao.Split("-")[1];
-
-        Console.WriteLine(numero);
-
-        string caminhoArquivoResultado = $"{pasta}TESTE-{numero}-RESULTADO.txt";
-
         try
         {
-            StringBuilder sb = new StringBuilder();
+            // Inicializa a lista de processos
+            List<Processo> processos = new List<Processo>();
+            Escalonador escalonador = new Escalonador();
 
-            for (int j = 0; j < medias.GetLength(0); j++)
-            { 
-                string tempoRetornoMedio = medias[j, 0].ToString();
-                string tempoEsperaMedio = medias[j, 1].ToString();
-                string tempoTurnaroundMedio = medias[j, 2].ToString();
+            // Lê o conteúdo do arquivo
+            string content = File.ReadAllText(file);
+            List<string> processosString = content.Split(Environment.NewLine).ToList();
 
-                sb.AppendLine($"{tempoRetornoMedio}\t{tempoEsperaMedio}\t{tempoTurnaroundMedio}");
+            // Extrai o quantum e remove a primeira linha
+            int numQuantum = int.Parse(processosString[0]);
+            processosString.RemoveAt(0);
+
+            Console.WriteLine($"Processando arquivo: {file}");
+
+            // Converte as linhas restantes em objetos Processo
+            foreach (var item in processosString)
+            {
+                if (string.IsNullOrWhiteSpace(item)) continue; // Ignora linhas vazias
+
+                string[] partes = item.Split(" ");
+                int chegada = int.Parse(partes[0]);
+                int duracao = int.Parse(partes[1]);
+
+                processos.Add(new Processo(chegada, duracao));
             }
 
-            string conteudoCompleto = string.Join(Environment.NewLine, sb);
-            File.WriteAllText(caminhoArquivoResultado, conteudoCompleto);
-            
+            // Executa os algoritmos de escalonamento
+            List<Processo> processosOriginais = processos.Select(p => p.Clone()).ToList();
+
+            List<Processo> resultadoFIFO = escalonador.executaFIFO(processos);
+            processos = processosOriginais.Select(p => p.Clone()).ToList();
+
+            List<Processo> resultadoSJF = escalonador.executaSJF(processos);
+            processos = processosOriginais.Select(p => p.Clone()).ToList();
+
+            List<Processo> resultadoSRT = escalonador.executaSRT(processos);
+            //processos = processosOriginais.Select(p => p.Clone()).ToList();
+
+            //List<Processo> resultadoRR = escalonador.executaRR(processos, numQuantum);
+
+            // Calcula as métricas médias
+            List<float> mediasFIFO = Calculadora.CalculaRetornoEsperaETurnAroundMedios(resultadoFIFO);
+            List<float> mediasSJF = Calculadora.CalculaRetornoEsperaETurnAroundMedios(resultadoSJF);
+            List<float> mediasSRT = Calculadora.CalculaRetornoEsperaETurnAroundMedios(resultadoSRT);
+            //List<float> mediasRR = Calculadora.CalculaRetornoEsperaETurnAroundMedios(resultadoRR);
+
+            // Gera o nome do arquivo de saída
+            string nomeArquivoSemExtensao = Path.GetFileNameWithoutExtension(file);
+            string numero = nomeArquivoSemExtensao.Split("-")[1];
+            string caminhoArquivoResultado = $"{pasta}TESTE-{numero}-RESULTADO.txt";
+
+            // Cria o conteúdo do arquivo de saída
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Resultados FIFO:");
+            sb.AppendLine($"Tempo médio de Retorno: {mediasFIFO[0]:F2}");
+            sb.AppendLine($"Tempo médio de Espera: {mediasFIFO[1]:F2}");
+            sb.AppendLine($"Tempo médio de TurnAround: {mediasFIFO[2]:F2}");
+            sb.AppendLine();
+
+            sb.AppendLine("Resultados SJF:");
+            sb.AppendLine($"Tempo médio de Retorno: {mediasSJF[0]:F2}");
+            sb.AppendLine($"Tempo médio de Espera: {mediasSJF[1]:F2}");
+            sb.AppendLine($"Tempo médio de TurnAround: {mediasSJF[2]:F2}");
+            sb.AppendLine();
+
+            sb.AppendLine("Resultados SRT:");
+            sb.AppendLine($"Tempo médio de Retorno: {mediasSRT[0]:F2}");
+            sb.AppendLine($"Tempo médio de Espera: {mediasSRT[1]:F2}");
+            sb.AppendLine($"Tempo médio de TurnAround: {mediasSRT[2]:F2}");
+            sb.AppendLine();
+
+            sb.AppendLine("Resultados RR:");
+            //sb.AppendLine($"Tempo médio de Retorno: {mediasRR[0]:F2}");
+            //sb.AppendLine($"Tempo médio de Espera: {mediasRR[1]:F2}");
+            //sb.AppendLine($"Tempo médio de TurnAround: {mediasRR[2]:F2}");
+
+            // Grava o arquivo de resultados
+            File.WriteAllText(caminhoArquivoResultado, sb.ToString());
+
+            Console.WriteLine($"Resultados salvos em: {caminhoArquivoResultado}");
         }
-        catch (Exception error) 
+        catch (Exception error)
         {
-            Console.WriteLine($"Erro ao criar ou escrever no arquivo: {error.Message}");
+            Console.WriteLine($"Erro ao processar o arquivo {file}: {error.Message}");
         }
     }
-
-   
 }
-
-
