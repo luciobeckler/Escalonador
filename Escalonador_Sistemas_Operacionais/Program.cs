@@ -9,8 +9,7 @@ if (Directory.Exists(pasta))
 
     foreach (string file in files)
     {
-        try
-        {
+        
             // Inicializa a lista de processos
             List<Processo> processos = new List<Processo>();
             Escalonador escalonador = new Escalonador();
@@ -41,15 +40,15 @@ if (Directory.Exists(pasta))
             List<Processo> processosOriginais = processos.Select(p => p.Clone()).ToList();
 
             List<Processo> resultadoFIFO = escalonador.executaFIFO(processos);
+            
             processos = processosOriginais.Select(p => p.Clone()).ToList();
-
             List<Processo> resultadoSJF = escalonador.executaSJF(processos);
+            
             processos = processosOriginais.Select(p => p.Clone()).ToList();
-
             List<Processo> resultadoSRT = escalonador.executaSRT(processos);
-            //processos = processosOriginais.Select(p => p.Clone()).ToList();
-
-            //List<Processo> resultadoRR = escalonador.executaRR(processos, numQuantum);
+            
+            processos = processosOriginais.Select(p => p.Clone()).ToList();
+            //List<float> resultadoRR = escalonador.executaRR(processos, numQuantum);
 
             // Calcula as métricas médias
             List<float> mediasFIFO = Calculadora.CalculaRetornoEsperaETurnAroundMedios(resultadoFIFO);
@@ -64,37 +63,17 @@ if (Directory.Exists(pasta))
 
             // Cria o conteúdo do arquivo de saída
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("Resultados FIFO:");
-            sb.AppendLine($"Tempo médio de Retorno: {mediasFIFO[0]:F2}");
-            sb.AppendLine($"Tempo médio de Espera: {mediasFIFO[1]:F2}");
-            sb.AppendLine($"Tempo médio de TurnAround: {mediasFIFO[2]:F2}");
-            sb.AppendLine();
+            sb.AppendLine($"{mediasFIFO[0]:F3} {mediasFIFO[1]:F3} {mediasFIFO[2]:F3}");
+            sb.AppendLine($"{mediasSJF[0]:F3} {mediasSJF[1]:F3} {mediasSJF[2]:F3}");
+            
+            sb.AppendLine($"{mediasSRT[0]:F3} {mediasSRT[1]:F3} {mediasSRT[2]:F3}");
 
-            sb.AppendLine("Resultados SJF:");
-            sb.AppendLine($"Tempo médio de Retorno: {mediasSJF[0]:F2}");
-            sb.AppendLine($"Tempo médio de Espera: {mediasSJF[1]:F2}");
-            sb.AppendLine($"Tempo médio de TurnAround: {mediasSJF[2]:F2}");
-            sb.AppendLine();
-
-            sb.AppendLine("Resultados SRT:");
-            sb.AppendLine($"Tempo médio de Retorno: {mediasSRT[0]:F2}");
-            sb.AppendLine($"Tempo médio de Espera: {mediasSRT[1]:F2}");
-            sb.AppendLine($"Tempo médio de TurnAround: {mediasSRT[2]:F2}");
-            sb.AppendLine();
-
-            sb.AppendLine("Resultados RR:");
-            //sb.AppendLine($"Tempo médio de Retorno: {mediasRR[0]:F2}");
-            //sb.AppendLine($"Tempo médio de Espera: {mediasRR[1]:F2}");
-            //sb.AppendLine($"Tempo médio de TurnAround: {mediasRR[2]:F2}");
-
+            //sb.AppendLine($"{mediasRR[0]:F3} {mediasRR[1]:F3} {mediasRR[2]:F3}");
+            
             // Grava o arquivo de resultados
             File.WriteAllText(caminhoArquivoResultado, sb.ToString());
 
             Console.WriteLine($"Resultados salvos em: {caminhoArquivoResultado}");
-        }
-        catch (Exception error)
-        {
-            Console.WriteLine($"Erro ao processar o arquivo {file}: {error.Message}");
-        }
+        
     }
 }

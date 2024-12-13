@@ -8,11 +8,11 @@ namespace Escalonador_Sistemas_Operacionais
 {
     public class Processo
     {
-        public int chegada { get; set; }
+        public int chegada { get;}
         public int duracao { get; set; }
         private int duracaoOriginal { get; set; } //Criado pois "duracao" é alterado durante o fluxo de execução e este é usado para o turnAround
-        public float tempoEspera { get; set; } = 0;  //Tempo que o processo aguarda para ser executado
-        public float tempoRetorno { get; set; } = 0; //Tempo que o processo espera para voltar a ser executado
+        public float tempoEspera { get; set; } = 0;  //Tempo de espera total
+        public float tempoRetorno { get; set; } = 0; //Tempo que o processo espera para começar a ser executado
         public float tempoTurnAround {                
             get 
             { 
