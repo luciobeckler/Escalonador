@@ -10,7 +10,6 @@ namespace Escalonador_Sistemas_Operacionais
 {
     public class Escalonador
     {
-
         public Escalonador() { }
 
         public List<Processo> executaFIFO(List<Processo> processos)
@@ -84,7 +83,6 @@ namespace Escalonador_Sistemas_Operacionais
                         .Where(p => tempoAtual >= p.chegada)
                         .OrderBy(p => p.duracao)
                         .ToList();
-
                 Processo processoEmExecucao = processosQueJaChegaramOrdenadosPorDuracao.FirstOrDefault();
                 
                 if(processoEmExecucao is not null)
@@ -92,29 +90,26 @@ namespace Escalonador_Sistemas_Operacionais
                     processoEmExecucao.duracao--;
                     processoEmExecucao.isEsteveEmExecucao = true;
 
-                    if (processoEmExecucao.duracao == 0)
+                    if (processoEmExecucao.isFinalizado())
                         retorno.Add(processoEmExecucao);
 
                     processosQueJaChegaramOrdenadosPorDuracao.RemoveAt(0);
 
                     foreach (var item in processosQueJaChegaramOrdenadosPorDuracao)
                     {
-                        if (!item.isEsteveEmExecucao)
-                            item.tempoRetorno++;
-
                         if (item.isEsteveEmExecucao)
                             item.tempoEspera++;
+                        else
+                            item.tempoRetorno++;
                     }
 
-                    processos.RemoveAll(p => p.duracao == 0);
-
+                    processos.RemoveAll(p => p.isFinalizado());
                     tempoAtual++;
                 }
                 else
                 {
                     tempoAtual++;
                 }
-                
             }
 
             foreach (var item in retorno)
@@ -125,78 +120,86 @@ namespace Escalonador_Sistemas_Operacionais
             return retorno;
         }
 
-
         public List<Processo> executaRR(List<Processo> processos, int numQuantum)
         {
             int tempoAtual = 0;
             List<Processo> processosQueJaChegaram = new List<Processo>();
+            int tempoNaCPU = numQuantum;
             List<Processo> retorno = new List<Processo>();
-
-            while(processos.Count > 0)
+            Queue<Processo> queue = new Queue<Processo>();
+            
+            while (processos.Count > 0 || queue.Count > 0)
             {
-                Processo processoNaoFinalizado = null;
-
-                foreach (var item in processos.ToList())
+                tempoNaCPU = numQuantum;
+                EnfileraProcessosQueJaChegaramEExcluiProcesso(ref processos, ref queue, tempoAtual);
+                
+                if(queue.Count > 0)
                 {
-                    if (tempoAtual >= item.chegada)
+                    Processo processoEmExecucao = queue.Dequeue();
+
+                    while (tempoNaCPU > 0)
                     {
-                        processosQueJaChegaram.Add(item);
-                        processos.Remove(item);
-                    }
-                }
-
-                if (processoNaoFinalizado is not null)
-                    processosQueJaChegaram.Add(processoNaoFinalizado);
-
-
-                bool isProcessoFinalizou = false;
-                int quantumBackup = numQuantum;
-                Processo processoEmExecucao = new Processo(0, 0);
-
-                if (processosQueJaChegaram.Count > 0)
-                {
-                    processoEmExecucao = processosQueJaChegaram[0];
-                    processosQueJaChegaram.RemoveAt(0);
-
-                    while (quantumBackup > 0 && !isProcessoFinalizou)
-                    {
-                        processoEmExecucao.isEsteveEmExecucao = true;
+                        EnfileraProcessosQueJaChegaramEExcluiProcesso(ref processos, ref queue, tempoAtual);
                         processoEmExecucao.duracao--;
-                        quantumBackup--;
+                        processoEmExecucao.isEsteveEmExecucao = true;
 
-                        isProcessoFinalizou = processoEmExecucao.duracao == 0;
+                        foreach (var item in queue)
+                        {
+                            if (item.isEsteveEmExecucao)
+                                item.tempoEspera++;
+                            else
+                                item.tempoRetorno++;
+                        }
 
-                        bool isTempoFinalizouSemFinalizarProcesso =
-                            (numQuantum == 0) &&
-                            (!isProcessoFinalizou);
+                        tempoNaCPU--;
+                        tempoAtual++;
 
-                        if (isProcessoFinalizou)
+                        if (processoEmExecucao.isFinalizado())
                         {
                             retorno.Add(processoEmExecucao);
-                            processos.Remove(processoEmExecucao);
+                            tempoNaCPU = 0; //Sai do loop
                         }
-                        else if (isTempoFinalizouSemFinalizarProcesso)
-                        {
-                            processosQueJaChegaram.Add(processoEmExecucao);
-                        }
-
-                        processosQueJaChegaram = this.AtualizaTempoRetornoEEsperaFilaExecucao(processosQueJaChegaram);
-                        tempoAtual++;
+                        
                     }
-                    if (processoEmExecucao.duracao > 0)
-                        processoNaoFinalizado = processoEmExecucao;
 
-
+                    if (!processoEmExecucao.isFinalizado() && tempoNaCPU == 0)
+                        processos.Add(processoEmExecucao);
                 }
                 else
                 {
                     tempoAtual++;
                 }
-                              
-            }          
+            }
+
+            foreach (var item in retorno)
+            {
+                item.tempoEspera += item.tempoRetorno;
+            }
 
             return retorno;
         }
+
+        private Queue<Processo> EnfileraProcessosQueJaChegaramEExcluiProcesso(ref List<Processo> processos, ref Queue<Processo> queue, int tempoAtual)
+        {
+            List<int> indicesParaRemover = new List<int>();
+
+            for (int i = 0; i < processos.Count; i++)
+            {
+                if (tempoAtual >= processos[i].chegada)
+                {
+                    queue.Enqueue(processos[i]);
+                    indicesParaRemover.Add(i);
+                }
+            }
+
+            for (int i = indicesParaRemover.Count - 1; i >= 0; i--)
+            {
+                processos.RemoveAt(indicesParaRemover[i]);
+            }
+
+            return queue;
+        }
+
 
         private List<Processo> AtualizaTempoRetornoEEsperaFilaExecucao(List<Processo> list)
         {

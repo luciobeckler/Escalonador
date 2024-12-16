@@ -36,5 +36,10 @@ namespace Escalonador_Sistemas_Operacionais
                 tempoEspera = this.tempoEspera,
             };
         }
+
+        public bool isFinalizado()
+        {
+            return this.duracao == 0;
+        }
     }
 }

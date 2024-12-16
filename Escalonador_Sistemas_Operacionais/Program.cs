@@ -38,7 +38,6 @@ if (Directory.Exists(pasta))
 
             // Executa os algoritmos de escalonamento
             List<Processo> processosOriginais = processos.Select(p => p.Clone()).ToList();
-
             List<Processo> resultadoFIFO = escalonador.executaFIFO(processos);
             
             processos = processosOriginais.Select(p => p.Clone()).ToList();
@@ -48,13 +47,13 @@ if (Directory.Exists(pasta))
             List<Processo> resultadoSRT = escalonador.executaSRT(processos);
             
             processos = processosOriginais.Select(p => p.Clone()).ToList();
-            //List<float> resultadoRR = escalonador.executaRR(processos, numQuantum);
+            List<Processo> resultadoRR = escalonador.executaRR(processos, numQuantum);
 
             // Calcula as métricas médias
             List<float> mediasFIFO = Calculadora.CalculaRetornoEsperaETurnAroundMedios(resultadoFIFO);
             List<float> mediasSJF = Calculadora.CalculaRetornoEsperaETurnAroundMedios(resultadoSJF);
             List<float> mediasSRT = Calculadora.CalculaRetornoEsperaETurnAroundMedios(resultadoSRT);
-            //List<float> mediasRR = Calculadora.CalculaRetornoEsperaETurnAroundMedios(resultadoRR);
+            List<float> mediasRR = Calculadora.CalculaRetornoEsperaETurnAroundMedios(resultadoRR);
 
             // Gera o nome do arquivo de saída
             string nomeArquivoSemExtensao = Path.GetFileNameWithoutExtension(file);
@@ -65,10 +64,8 @@ if (Directory.Exists(pasta))
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"{mediasFIFO[0]:F3} {mediasFIFO[1]:F3} {mediasFIFO[2]:F3}");
             sb.AppendLine($"{mediasSJF[0]:F3} {mediasSJF[1]:F3} {mediasSJF[2]:F3}");
-            
             sb.AppendLine($"{mediasSRT[0]:F3} {mediasSRT[1]:F3} {mediasSRT[2]:F3}");
-
-            //sb.AppendLine($"{mediasRR[0]:F3} {mediasRR[1]:F3} {mediasRR[2]:F3}");
+            sb.AppendLine($"{mediasRR[0]:F3} {mediasRR[1]:F3} {mediasRR[2]:F3}");
             
             // Grava o arquivo de resultados
             File.WriteAllText(caminhoArquivoResultado, sb.ToString());
