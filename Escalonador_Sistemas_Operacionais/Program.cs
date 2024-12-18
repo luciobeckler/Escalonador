@@ -1,5 +1,6 @@
 ﻿using Escalonador_Sistemas_Operacionais;
 using System.Text;
+using System.Text.RegularExpressions;
 
 string pasta = "C:\\Users\\lucio\\Documents\\ParkIF\\Escalonador_Sistemas_Operacionais\\Escalonador_Sistemas_Operacionais\\ArquivosTestes\\";
 
@@ -19,7 +20,7 @@ if (Directory.Exists(pasta))
             List<string> processosString = content.Split(Environment.NewLine).ToList();
 
             // Extrai o quantum e remove a primeira linha
-            int numQuantum = int.Parse(processosString[0]);
+             int numQuantum = int.Parse(processosString[0]);
             processosString.RemoveAt(0);
 
             Console.WriteLine($"Processando arquivo: {file}");
@@ -29,7 +30,8 @@ if (Directory.Exists(pasta))
             {
                 if (string.IsNullOrWhiteSpace(item)) continue; // Ignora linhas vazias
 
-                string[] partes = item.Split(" ");
+                string[] partes = Regex.Replace(item, @"\s+", " ").Split(" "); // Normaliza os tipos de espaços, necessário pois podem haver espaços inquebráveis que devem ser substituidos por espaços normais.
+
                 int chegada = int.Parse(partes[0]);
                 int duracao = int.Parse(partes[1]);
 

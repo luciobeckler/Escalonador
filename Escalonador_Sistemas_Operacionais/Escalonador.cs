@@ -14,20 +14,30 @@ namespace Escalonador_Sistemas_Operacionais
 
         public List<Processo> executaFIFO(List<Processo> processos)
         {
-            Queue<Processo> queue = new Queue<Processo>();
             List<Processo> retorno = new List<Processo>();
-            foreach (var item in processos)
-                queue.Enqueue(item);
+
 
             int tempoAtual = 0; 
-            while (queue.Count > 0)
+            while (processos.Count > 0)
             {
-                Processo processoEmExecucao = queue.Dequeue();
-                processoEmExecucao.tempoEspera = tempoAtual - processoEmExecucao.chegada;
-                processoEmExecucao.tempoRetorno = processoEmExecucao.tempoEspera;
-                tempoAtual += processoEmExecucao.duracao;
+                Processo processoEmExecucao = processos
+                    .Where(p => tempoAtual >= p.chegada)
+                    .FirstOrDefault();
 
-                retorno.Add(processoEmExecucao);
+                if(processoEmExecucao is not null)
+                {
+                    processoEmExecucao.tempoEspera = tempoAtual - processoEmExecucao.chegada;
+                    processoEmExecucao.tempoRetorno = processoEmExecucao.tempoEspera;
+
+                    tempoAtual += processoEmExecucao.duracao;
+
+                    retorno.Add(processoEmExecucao);
+                    processos.Remove(processoEmExecucao);
+                }
+                else
+                {
+                    tempoAtual++;
+                }
             }
 
             return retorno;
